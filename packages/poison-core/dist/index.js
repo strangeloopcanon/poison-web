@@ -130,7 +130,7 @@ function applyAria($, payload, selector) {
 function inject(html, options) {
     // Validate inputs
     validatePayload(options.payload);
-    validateTechniques(options.techniques); // Validate multiple techniques
+    validateTechniques(options.techniques);
     if (!html || typeof html !== 'string') {
         throw new Error('HTML content must be a non-empty string');
     }
@@ -154,7 +154,6 @@ function inject(html, options) {
                     applyAria($, options.payload, options.selector);
                     break;
                 default:
-                    // This case should ideally not be reached due to validateTechnique
                     console.warn(`Technique ${technique} not implemented.`);
             }
         }

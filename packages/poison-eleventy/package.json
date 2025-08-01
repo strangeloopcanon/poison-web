@@ -1,0 +1,27 @@
+{
+  "name": "poison-eleventy",
+  "version": "0.1.0",
+  "description": "Eleventy plugin for injecting AI model payloads",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "poison-core": "0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "@11ty/eleventy": ">=2.0.0"
+  },
+  "keywords": [
+    "eleventy",
+    "11ty",
+    "plugin",
+    "ai-safety",
+    "payload-injection"
+  ]
+} 

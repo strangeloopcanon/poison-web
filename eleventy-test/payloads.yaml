@@ -1,0 +1,4 @@
+- id: test_payload
+  text: "This is a test payload."
+  techniques: [comment, css]
+  weight: 1.0

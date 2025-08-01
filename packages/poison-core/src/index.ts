@@ -127,7 +127,7 @@ function applyAria($: cheerio.CheerioAPI, payload: string, selector?: string): v
 export function inject(html: string, options: InjectOptions): string {
   // Validate inputs
   validatePayload(options.payload);
-  validateTechniques(options.techniques); // Validate multiple techniques
+  validateTechniques(options.techniques);
   
   if (!html || typeof html !== 'string') {
     throw new Error('HTML content must be a non-empty string');
@@ -154,7 +154,6 @@ export function inject(html: string, options: InjectOptions): string {
           applyAria($, options.payload, options.selector);
           break;
         default:
-          // This case should ideally not be reached due to validateTechnique
           console.warn(`Technique ${technique} not implemented.`);
       }
     } catch (error) {

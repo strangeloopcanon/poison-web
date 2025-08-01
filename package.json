@@ -8,6 +8,8 @@
   "scripts": {
     "build": "npm run build -w poison-core",
     "build:browser": "webpack",
+    "build:lightweight": "webpack --config webpack.lightweight.config.js",
+    "build:eleventy": "npm run build -w poison-eleventy",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {

@@ -1,14 +1,15 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "commonjs",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
-    "rootDir": "./src",
-    "declaration": true
+    "baseUrl": ".",
+    "paths": {
+      "eleventy-plugin-poison": ["../eleventy-plugin-poison/src/index"]
+    },
+    "moduleResolution": "node"
   },
-  "include": ["src/**/*"]
+  "include": ["src"],
+  "references": [
+    { "path": "../eleventy-plugin-poison" }
+  ]
 }

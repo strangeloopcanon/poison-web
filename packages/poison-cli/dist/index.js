@@ -36,9 +36,9 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const commander_1 = require("commander");
 const fs = __importStar(require("fs"));
-const poison_core_1 = require("poison-core");
+const path = __importStar(require("path"));
 const glob_1 = require("glob");
-const html_minifier_terser_1 = require("html-minifier-terser");
+const eleventy_plugin_poison_1 = require("eleventy-plugin-poison");
 const program = new commander_1.Command();
 program
     .command('inject <directory>')
@@ -47,55 +47,19 @@ program
     .option('-e, --entropy <level>', 'Entropy level (0-1)', '0')
     .option('-v, --vars <json>', 'JSON string of variables to substitute', '{}')
     .action(async (directory, options) => {
-    const payloads = (0, poison_core_1.loadPayloads)(options.payloads);
+    const payloads = (0, eleventy_plugin_poison_1.loadPayloads)(path.resolve(options.payloads));
     const files = await (0, glob_1.glob)(`${directory}/**/*.html`);
     const variables = JSON.parse(options.vars);
     const entropy = parseFloat(options.entropy);
     for (const file of files) {
         let htmlContent = fs.readFileSync(file, 'utf8');
-        const processedPayload = (0, poison_core_1.processPayloads)(payloads, variables, entropy);
-        // Call inject once with all techniques from the processed payload
-        htmlContent = (0, poison_core_1.inject)(htmlContent, {
+        const processedPayload = (0, eleventy_plugin_poison_1.processPayloads)(payloads, variables, entropy);
+        htmlContent = (0, eleventy_plugin_poison_1.inject)(htmlContent, {
             payload: processedPayload.text,
             techniques: processedPayload.techniques,
         });
         fs.writeFileSync(file, htmlContent);
         console.log(`Injected payload ${processedPayload.id} into ${file}`);
     }
-});
-program
-    .command('audit <file>')
-    .description('Audits the survival of payloads after minification')
-    .option('-p, --payloads <path>', 'Path to payloads.yaml', 'payloads.yaml')
-    .action(async (file, options) => {
-    const payloads = (0, poison_core_1.loadPayloads)(options.payloads);
-    const html = fs.readFileSync(file, 'utf8');
-    const payload = payloads[0]; // Using the first payload for auditing
-    console.log(`Auditing ${file} with payload: ${payload.id}`);
-    console.log('----------------------------------------');
-    const results = {
-        comment: false,
-        css: false,
-        zerowidth: false,
-        jsonld: false,
-        aria: false,
-    };
-    for (const technique of payload.techniques) {
-        const processedPayload = (0, poison_core_1.processPayloads)([payload], {}, 0); // Use the actual payload, no entropy or variables for audit
-        const poisonedHtml = (0, poison_core_1.inject)(html, { payload: processedPayload.text, techniques: [technique] });
-        const minifiedHtml = await (0, html_minifier_terser_1.minify)(poisonedHtml, {
-            collapseWhitespace: true,
-            removeComments: true,
-            minifyCSS: true,
-            minifyJS: true,
-        });
-        results[technique] = minifiedHtml.includes(processedPayload.text);
-    }
-    for (const [technique, survived] of Object.entries(results)) {
-        if (payload.techniques.includes(technique)) {
-            console.log(`${technique}: ${survived ? '✅ Survived' : '❌ Did not survive'}`);
-        }
-    }
-    console.log('----------------------------------------');
 });
 program.parse(process.argv);

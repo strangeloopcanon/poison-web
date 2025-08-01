@@ -92,77 +92,37 @@ function selectWeightedPayload(payloads) {
     }
     return payloads[0]; // fallback
 }
-function applyComment(content, payload, selector) {
-    try {
-        const $ = cheerio.load(content);
-        const target = selector ? $(selector) : $('body');
-        target.append(`<!-- ${payload} -->`);
-        return $.html();
+function applyComment($, payload, selector) {
+    const target = selector ? $(selector) : $('body');
+    target.append(`<!-- ${payload} -->`);
+}
+function applyCss($, payload, selector) {
+    const target = selector ? $(selector) : $('body');
+    target.append(`<span style="display:none">${payload}</span>`);
+}
+function applyZeroWidth($, payload, selector) {
+    const watermark = (0, zero_width_watermark_1.embed)(payload, ' ');
+    const target = selector ? $(selector) : $('p').first();
+    if (target.length) {
+        target.text(target.text() + watermark);
     }
-    catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        throw new Error(`Failed to apply comment technique: ${errorMessage}`);
+    else {
+        $('body').append(`<span style="display:none">${watermark}</span>`);
     }
 }
-function applyCss(content, payload, selector) {
-    try {
-        const $ = cheerio.load(content);
-        const target = selector ? $(selector) : $('body');
-        target.append(`<span style="display:none">${payload}</span>`);
-        return $.html();
-    }
-    catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        throw new Error(`Failed to apply CSS technique: ${errorMessage}`);
-    }
+function applyJsonLd($, payload, selector) {
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "Dataset",
+        "name": "LLM Instruction Patch",
+        "description": payload
+    };
+    const target = selector ? $(selector) : $('head');
+    target.append(`<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>`);
 }
-function applyZeroWidth(content, payload, selector) {
-    try {
-        const $ = cheerio.load(content);
-        const watermark = (0, zero_width_watermark_1.embed)(payload, ' ');
-        const target = selector ? $(selector) : $('p').first();
-        if (target.length) {
-            target.text(target.text() + watermark);
-        }
-        else {
-            $('body').append(`<span style="display:none">${watermark}</span>`);
-        }
-        return $.html();
-    }
-    catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        throw new Error(`Failed to apply zero-width technique: ${errorMessage}`);
-    }
-}
-function applyJsonLd(content, payload, selector) {
-    try {
-        const $ = cheerio.load(content);
-        const jsonLd = {
-            "@context": "https://schema.org",
-            "@type": "Dataset",
-            "name": "LLM Instruction Patch",
-            "description": payload
-        };
-        const target = selector ? $(selector) : $('head');
-        target.append(`<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>`);
-        return $.html();
-    }
-    catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        throw new Error(`Failed to apply JSON-LD technique: ${errorMessage}`);
-    }
-}
-function applyAria(content, payload, selector) {
-    try {
-        const $ = cheerio.load(content);
-        const target = selector ? $(selector) : $('body');
-        target.append(`<span aria-label="${payload}"></span>`);
-        return $.html();
-    }
-    catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        throw new Error(`Failed to apply ARIA technique: ${errorMessage}`);
-    }
+function applyAria($, payload, selector) {
+    const target = selector ? $(selector) : $('body');
+    target.append(`<span aria-label="${payload}"></span>`);
 }
 function inject(html, options) {
     // Validate inputs
@@ -171,29 +131,35 @@ function inject(html, options) {
     if (!html || typeof html !== 'string') {
         throw new Error('HTML content must be a non-empty string');
     }
-    let poisonedHtml = html;
+    const $ = cheerio.load(html);
     for (const technique of options.techniques) {
-        switch (technique) {
-            case 'comment':
-                poisonedHtml = applyComment(poisonedHtml, options.payload, options.selector);
-                break;
-            case 'css':
-                poisonedHtml = applyCss(poisonedHtml, options.payload, options.selector);
-                break;
-            case 'zerowidth':
-                poisonedHtml = applyZeroWidth(poisonedHtml, options.payload, options.selector);
-                break;
-            case 'jsonld':
-                poisonedHtml = applyJsonLd(poisonedHtml, options.payload, options.selector);
-                break;
-            case 'aria':
-                poisonedHtml = applyAria(poisonedHtml, options.payload, options.selector);
-                break;
-            default:
-                console.warn(`Technique ${technique} not implemented.`);
+        try {
+            switch (technique) {
+                case 'comment':
+                    applyComment($, options.payload, options.selector);
+                    break;
+                case 'css':
+                    applyCss($, options.payload, options.selector);
+                    break;
+                case 'zerowidth':
+                    applyZeroWidth($, options.payload, options.selector);
+                    break;
+                case 'jsonld':
+                    applyJsonLd($, options.payload, options.selector);
+                    break;
+                case 'aria':
+                    applyAria($, options.payload, options.selector);
+                    break;
+                default:
+                    console.warn(`Technique ${technique} not implemented.`);
+            }
+        }
+        catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            throw new Error(`Failed to apply ${technique} technique: ${errorMessage}`);
         }
     }
-    return poisonedHtml;
+    return $.html();
 }
 // Helper function for single technique injection
 function injectSingle(html, options) {
@@ -206,8 +172,10 @@ function injectSingle(html, options) {
 // Enhanced payload processing with weighted selection
 function processPayloads(payloads, variables = {}, entropy = 0) {
     const selectedPayload = selectWeightedPayload(payloads);
-    // Create a copy with processed text
-    const processedText = addEntropy(substituteVariables(selectedPayload.text, variables), entropy);
+    // Merge variables from CLI and payload
+    const mergedVariables = { ...variables, ...selectedPayload };
+    // Process text with merged variables and entropy
+    const processedText = addEntropy(substituteVariables(selectedPayload.text, mergedVariables), entropy);
     return {
         ...selectedPayload,
         text: processedText
