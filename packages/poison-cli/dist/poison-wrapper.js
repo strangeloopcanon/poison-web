@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.selectWeightedPayload = exports.addEntropy = exports.substituteVariables = exports.loadPayloads = exports.processPayloads = exports.inject = void 0;
-const eleventy_plugin_poison_1 = require("eleventy-plugin-poison");
-Object.defineProperty(exports, "inject", { enumerable: true, get: function () { return eleventy_plugin_poison_1.inject; } });
-Object.defineProperty(exports, "processPayloads", { enumerable: true, get: function () { return eleventy_plugin_poison_1.processPayloads; } });
-Object.defineProperty(exports, "loadPayloads", { enumerable: true, get: function () { return eleventy_plugin_poison_1.loadPayloads; } });
-Object.defineProperty(exports, "substituteVariables", { enumerable: true, get: function () { return eleventy_plugin_poison_1.substituteVariables; } });
-Object.defineProperty(exports, "addEntropy", { enumerable: true, get: function () { return eleventy_plugin_poison_1.addEntropy; } });
-Object.defineProperty(exports, "selectWeightedPayload", { enumerable: true, get: function () { return eleventy_plugin_poison_1.selectWeightedPayload; } });
+const poison_core_1 = require("poison-core");
+Object.defineProperty(exports, "inject", { enumerable: true, get: function () { return poison_core_1.inject; } });
+Object.defineProperty(exports, "processPayloads", { enumerable: true, get: function () { return poison_core_1.processPayloads; } });
+Object.defineProperty(exports, "loadPayloads", { enumerable: true, get: function () { return poison_core_1.loadPayloads; } });
+Object.defineProperty(exports, "substituteVariables", { enumerable: true, get: function () { return poison_core_1.substituteVariables; } });
+Object.defineProperty(exports, "addEntropy", { enumerable: true, get: function () { return poison_core_1.addEntropy; } });
+Object.defineProperty(exports, "selectWeightedPayload", { enumerable: true, get: function () { return poison_core_1.selectWeightedPayload; } });

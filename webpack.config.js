@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
   mode: 'production',
-  entry: './packages/poison-core/src/browser.ts',
+  entry: './packages/poison-core/src/index.ts',
   module: {
     rules: [
       {

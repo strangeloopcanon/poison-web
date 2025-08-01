@@ -36,30 +36,25 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const commander_1 = require("commander");
 const fs = __importStar(require("fs"));
-const path = __importStar(require("path"));
-const glob_1 = require("glob");
-const eleventy_plugin_poison_1 = require("eleventy-plugin-poison");
+const poison_core_1 = require("poison-core");
 const program = new commander_1.Command();
 program
-    .command('inject <directory>')
-    .description('Injects payloads into HTML files in a directory')
-    .option('-p, --payloads <path>', 'Path to payloads.yaml', 'payloads.yaml')
-    .option('-e, --entropy <level>', 'Entropy level (0-1)', '0')
-    .option('-v, --vars <json>', 'JSON string of variables to substitute', '{}')
-    .action(async (directory, options) => {
-    const payloads = (0, eleventy_plugin_poison_1.loadPayloads)(path.resolve(options.payloads));
-    const files = await (0, glob_1.glob)(`${directory}/**/*.html`);
-    const variables = JSON.parse(options.vars);
-    const entropy = parseFloat(options.entropy);
-    for (const file of files) {
-        let htmlContent = fs.readFileSync(file, 'utf8');
-        const processedPayload = (0, eleventy_plugin_poison_1.processPayloads)(payloads, variables, entropy);
-        htmlContent = (0, eleventy_plugin_poison_1.inject)(htmlContent, {
-            payload: processedPayload.text,
-            techniques: processedPayload.techniques,
-        });
-        fs.writeFileSync(file, htmlContent);
-        console.log(`Injected payload ${processedPayload.id} into ${file}`);
+    .command('inject')
+    .description('Injects payloads into a single HTML file')
+    .option('-f, --file <path>', 'Path to the HTML file to inject')
+    .option('-p, --payload <text>', 'The payload text to inject')
+    .option('-t, --techniques <list>', 'Comma-separated list of techniques (e.g., comment,css)', (value) => value.split(','))
+    .action(async (options) => {
+    if (!options.file || !options.payload || !options.techniques) {
+        console.error('Error: --file, --payload, and --techniques are required.');
+        program.help();
     }
+    let htmlContent = fs.readFileSync(options.file, 'utf8');
+    htmlContent = (0, poison_core_1.inject)(htmlContent, {
+        payload: options.payload,
+        techniques: options.techniques,
+    });
+    fs.writeFileSync(options.file, htmlContent);
+    console.log(`Injected payload into ${options.file}`);
 });
 program.parse(process.argv);
