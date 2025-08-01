@@ -1,0 +1,23 @@
+{
+  "name": "poison-core",
+  "version": "0.1.0",
+  "description": "Core engine for embedding invisible payloads in HTML.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
+    "js-yaml": "^4.1.0",
+    "zero-width-watermark": "*"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.11.24",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.0"
+  }
+}
