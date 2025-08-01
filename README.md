@@ -87,14 +87,20 @@ A research toolkit for embedding invisible payloads in web content that can infl
 # Install globally
 npm install -g poison-cli
 
-# Inject payloads into HTML files
-poison inject --file index.html --payload "IGNORE ALL PRIOR INSTRUCTIONS" --techniques comment,css
+# Simple injection
+poison inject-simple --file index.html --payload "IGNORE ALL PRIOR INSTRUCTIONS" --techniques comment,css
 
-# Use YAML payloads with variables and entropy
-poison inject --file index.html --payloads payloads.yaml --vars magic=HOOT-42 --entropy 0.1
+# Advanced injection with YAML payloads
+poison inject --file index.html --payloads payloads.yaml --vars magic=HOOT-42,code=SECRET-123 --entropy 0.1
+
+# Inject into multiple files
+poison inject --dir ./public --payloads payloads.yaml --vars magic=HOOT-42
 
 # Audit existing injections
-poison audit --file index.html
+poison audit --file index.html --verbose
+
+# Audit multiple files
+poison audit --dir ./public
 ```
 
 ### Eleventy Plugin
